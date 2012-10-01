@@ -182,12 +182,16 @@
     NSTimeInterval cacheTime = 0;
     NSMutableDictionary * body = [NSMutableDictionary dictionary];
 	
+    NSMutableArray * finalArray = [NSMutableArray array];
     
     for (NSDictionary* element in rootChildren)
     {
         NSString* elementName = [element objectForKey:kElementName];
         NSDictionary* attributes = [element objectForKey:kElementAttibutes];
         NSString * attributeName = [attributes objectForKey:@"name"];
+        
+        if (attributeName == nil)
+            attributeName = elementName;
         
         NSMutableArray * array = [NSMutableArray array];
         
@@ -208,9 +212,15 @@
             
             [children release];
             
+            if (array != nil)
+                [finalArray addObject:[NSDictionary dictionaryWithObject:array forKey:attributeName]];
+            
+            if (finalArray != nil)
+                [body setObject:finalArray forKey:@"main"];
+            
         }
         
-        if ([elementName isEqualToString:@"channel"])
+        else if ([elementName isEqualToString:@"channel"])
         {
             NSArray* children = [[element objectForKey:kElementChildren] retain];
             
@@ -221,12 +231,14 @@
             }
             
             hasBody = YES;
+            
+            if (array != nil)
+                [body setObject:array forKey:attributeName];
+            
         }
-        if (attributeName == nil)
-            attributeName = elementName;
         
-        if (array != nil)
-            [body setObject:array forKey:attributeName];
+        
+        
     }
     
     BOOL isValidResponseStructure = /*hasErrorCode && hasErrorDescription && hasCacheTime &&*/ hasBody;

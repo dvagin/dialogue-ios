@@ -22,7 +22,7 @@
 
 - (NSArray*)daysForHallName:(NSString*)hallName
 {
-    NSArray * daysArray = [[self mainDict] objectForKey:hallName];
+    NSArray * daysArray = [self arrayForHallName:hallName];
     if (daysArray.count)
     {
         NSMutableArray * finalArray = [NSMutableArray array];
@@ -42,9 +42,26 @@
         return nil;
 }
 
+- (NSArray*) arrayForHallName:(NSString*)hallName
+{
+    NSArray * daysArray = [[self mainDict] objectForKey:@"main"];
+    
+    if (daysArray.count)
+        for (NSDictionary * oneDict in daysArray)
+        {
+            NSString * hallString = [[oneDict allKeys] objectAtIndex:0];
+            
+            if ([hallString isEqualToString:hallName])
+                return [oneDict objectForKey:hallString];
+        }
+    
+    return nil;
+    
+}
+
 - (NSArray*)dataForHallName:(NSString*)hallName
 {
-    NSArray * daysArray = [[self mainDict] objectForKey:hallName];
+    NSArray * daysArray = [self arrayForHallName:hallName];
     if (daysArray.count)
     {
         NSMutableArray * finalArray = [NSMutableArray array];
@@ -64,6 +81,24 @@
         return nil;
 }
 
+- (void) setKeys
+{
+    NSArray * daysArray = [[self mainDict] objectForKey:@"main"];
+    NSMutableArray * keys = [NSMutableArray array];
+    
+    if (daysArray.count)
+        for (NSDictionary * oneDict in daysArray)
+        {
+            NSString * hallString = [[oneDict allKeys] objectAtIndex:0];
+            
+            if (hallString != nil)
+            {
+                [keys addObject:hallString];
+            }
+        }
+    
+    [self setObject:keys forKey:@"keys"];
+}
 
 #pragma mark -
 #pragma mark BaseDataSource members
@@ -79,8 +114,8 @@
 {
     //main data
     [self setObject:responce.body forKey:@"main"];
-    [self setObject:[[self mainDict] allKeys] forKey:@"keys"];
-//   NSLog(@"%@",[self mainDict]);
+    [self setKeys];
+   NSLog(@"%@",[self mainDict]);
     
     return YES;
 }

@@ -11,6 +11,7 @@
 #import "DataManager.h"
 #import "HallCell.h"
 #import "DetailNewsViewController.h"
+#import "ListDataSource.h"
 
 @interface ProgrammeViewController ()
 
@@ -38,6 +39,8 @@
     
     [selector reloadData];
     
+    [self registerForNotifications];
+    
     customNavigationBar.leftBarItemView = [CustomNavigationBar createBarButtonWithTarget:self action:@selector(goBack) normalImageName: @"backButton.png"];
 }
 
@@ -48,6 +51,39 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+}
+
+- (void) registerForNotifications
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processDataSourceNotification:) name:kNotificationDataSourceUpdateIsCompleted object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processDataSourceNotification:) name:kNotificationDataSourceUpdateIsFailed object:nil];
+}
+
+- (void) processDataSourceNotification:(NSNotification*)notification
+{
+    
+    if ([notification.name isEqualToString:kNotificationDataSourceUpdateIsCompleted])
+    {        
+        if ([[notification object] class] == [ListDataSource class]) // notification for events
+        {
+            [self done];
+            
+        }
+        
+    }
+    else //error
+    {
+        if ([[notification object] class] == [ListDataSource class]) // notification for events
+        {
+            //[self reloadCategoryData];
+        }
+    }
+}
+
+- (void) done
+{
+    [selector reloadData];
+    [table reloadData];
 }
 
 #pragma mark - DataSource methods
